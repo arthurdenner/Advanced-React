@@ -5,9 +5,6 @@ const Sell = () => {
   return (
     <div>
       <p>Hey from Sell!</p>
-      <Link href="/">
-        <a>Go to Home</a>
-      </Link>
     </div>
   );
 };

@@ -5,9 +5,6 @@ const Home = () => {
   return (
     <div>
       <p>Hey from Home!</p>
-      <Link href="/sell">
-        <a>Go to Sell</a>
-      </Link>
     </div>
   );
 };
