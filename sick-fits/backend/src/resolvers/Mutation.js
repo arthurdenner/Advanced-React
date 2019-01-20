@@ -1,9 +1,8 @@
 const mutations = {
-  createDog(parent, args, ctx, info) {
-    global.dogs = global.dogs || [];
-    global.dogs.push(args);
+  async createItem(parent, args, ctx, info) {
+    // TODO: Check if the user is logged in
 
-    return args;
+    return ctx.db.mutation.createItem({ data: { ...args } }, info);
   },
 };
 
