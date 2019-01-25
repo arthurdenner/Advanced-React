@@ -56,6 +56,10 @@ injectGlobal`
   button {
     font-family: 'radnika_next';
   }
+
+  button:disabled {
+    opacity: 0.5;
+  }
 `;
 
 class Page extends Component {
