@@ -69,6 +69,7 @@ class CreateItem extends Component {
       this.setState({ isUploadingFile: false });
     }
   };
+
   render() {
     const { isUploadingFile } = this.state;
 
@@ -82,7 +83,6 @@ class CreateItem extends Component {
               // call the mutation
               const res = await createItem();
               // change them to the single item page
-              console.log(res);
               Router.push({
                 pathname: '/item',
                 query: { id: res.data.createItem.id },
