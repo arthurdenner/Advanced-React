@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 import { ALL_ITEMS_QUERY } from './Items';
@@ -11,7 +11,7 @@ const DELETE_ITEM_MUTATION = gql`
   }
 `;
 
-class DeleteItem extends Component {
+class DeleteItem extends React.Component {
   update = (cache, payload) => {
     // manually update the cache on the client, so it matches the server
     // 1. Read the cache for the items we want
