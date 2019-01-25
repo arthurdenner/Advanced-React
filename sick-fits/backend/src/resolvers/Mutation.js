@@ -4,6 +4,11 @@ const mutations = {
 
     return ctx.db.mutation.createItem({ data: { ...args } }, info);
   },
+  updateItem(parent, args, ctx, info) {
+    const { id, ...updates } = args;
+
+    return ctx.db.mutation.updateItem({ data: updates, where: { id } }, info);
+  },
 };
 
 module.exports = mutations;
