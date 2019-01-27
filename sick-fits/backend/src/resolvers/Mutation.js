@@ -5,6 +5,12 @@ const { promisify } = require('util');
 const { transport, makeANiceEmail } = require('../mail');
 const { hasPermission } = require('../utils');
 
+const checkLogin = ctx => {
+  if (!ctx.request.userId) {
+    throw new Error('You must be signed in to do that!');
+  }
+};
+
 const setCookie = (ctx, userId) => {
   const token = jwt.sign({ userId }, process.env.APP_SECRET);
 
@@ -16,9 +22,7 @@ const setCookie = (ctx, userId) => {
 
 const mutations = {
   createItem(parent, args, ctx, info) {
-    if (!ctx.request.userId) {
-      throw new Error('You must be logged in to do that!');
-    }
+    checkLogin(ctx);
 
     return ctx.db.mutation.createItem(
       {
@@ -153,9 +157,7 @@ const mutations = {
     return updatedUser;
   },
   async updatePermissions(parent, args, ctx, info) {
-    if (!ctx.request.userId) {
-      throw new Error('You must be logged in to do that!');
-    }
+    checkLogin(ctx);
 
     const currentUser = await ctx.db.query.user(
       { where: { id: ctx.request.userId } },
@@ -168,6 +170,36 @@ const mutations = {
       {
         data: { permissions: { set: args.permissions } },
         where: { id: args.userId },
+      },
+      info
+    );
+  },
+  async addToCart(parent, args, ctx, info) {
+    checkLogin(ctx);
+
+    const [existingCartItem] = await ctx.db.query.cartItems({
+      where: {
+        user: { id: ctx.request.userId },
+        item: { id: args.id },
+      },
+    });
+
+    if (existingCartItem) {
+      return ctx.db.mutation.updateCartItem(
+        {
+          where: { id: existingCartItem.id },
+          data: { quantity: existingCartItem.quantity + 1 },
+        },
+        info
+      );
+    }
+
+    return ctx.db.mutation.createCartItem(
+      {
+        data: {
+          user: { connect: { id: ctx.request.userId } },
+          item: { connect: { id: args.id } },
+        },
       },
       info
     );
