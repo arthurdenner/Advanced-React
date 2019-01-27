@@ -15,9 +15,19 @@ const setCookie = (ctx, userId) => {
 
 const mutations = {
   createItem(parent, args, ctx, info) {
-    // TODO: Check if the user is logged in
+    if (!ctx.request.userId) {
+      throw new Error('You must be logged in to do that!');
+    }
 
-    return ctx.db.mutation.createItem({ data: { ...args } }, info);
+    return ctx.db.mutation.createItem(
+      {
+        data: {
+          ...args,
+          user: { connect: { id: ctx.request.userId } },
+        },
+      },
+      info
+    );
   },
   deleteItem(parent, args, ctx, info) {
     const { id } = args;
