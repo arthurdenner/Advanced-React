@@ -30,10 +30,23 @@ const mutations = {
       info
     );
   },
-  deleteItem(parent, args, ctx, info) {
-    const { id } = args;
+  async deleteItem(parent, args, ctx, info) {
+    const where = { where: { id: args.id } };
+    const currentUser = await ctx.db.query.user(
+      { where: { id: ctx.request.userId } },
+      '{ id permissions }'
+    );
 
-    return ctx.db.mutation.deleteItem({ where: { id } }, info);
+    hasPermission(currentUser, ['ADMIN', 'ITEMDELETE']);
+
+    const item = await ctx.db.query.item(where, '{ id user { id }}');
+    const ownsItem = item.user.id === ctx.request.userId;
+
+    if (!ownsItem) {
+      throw new Error("You don't own this item");
+    }
+
+    return ctx.db.mutation.deleteItem(where, info);
   },
   updateItem(parent, args, ctx, info) {
     const { id, ...updates } = args;
