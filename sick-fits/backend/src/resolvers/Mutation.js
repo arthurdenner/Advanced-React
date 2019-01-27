@@ -204,6 +204,24 @@ const mutations = {
       info
     );
   },
+  async removeFromCart(parent, args, ctx, info) {
+    checkLogin(ctx);
+
+    const cartItem = await ctx.db.query.cartItem(
+      { where: { id: args.id } },
+      `{ id, user { id }}`
+    );
+
+    if (!cartItem) {
+      throw new Error('No such cart item found');
+    }
+
+    if (cartItem.user.id !== ctx.request.userId) {
+      throw new Error("You don't own this item");
+    }
+
+    return ctx.db.mutation.deleteCartItem({ where: { id: args.id } }, info);
+  },
 };
 
 module.exports = mutations;
