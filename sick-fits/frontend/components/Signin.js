@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Mutation } from 'react-apollo';
 import Router from 'next/router';
 import gql from 'graphql-tag';
@@ -17,6 +18,14 @@ const SIGNIN_MUTATION = gql`
 `;
 
 class Signin extends React.Component {
+  static propTypes = {
+    redirectAfterSuccess: PropTypes.bool,
+  };
+
+  static defaultProps = {
+    redirectAfterSuccess: true,
+  };
+
   state = {
     email: '',
     password: '',
@@ -29,6 +38,7 @@ class Signin extends React.Component {
   };
 
   render() {
+    const { redirectAfterSuccess } = this.props;
     const { email, password } = this.state;
 
     return (
@@ -43,7 +53,9 @@ class Signin extends React.Component {
             onSubmit={async e => {
               e.preventDefault();
               await signup();
-              Router.push('/');
+              if (redirectAfterSuccess) {
+                Router.push('/');
+              }
             }}
           >
             <fieldset disabled={loading} aria-busy={loading}>
