@@ -133,6 +133,7 @@ class CreateItem extends Component {
                   required
                   value={this.state.price}
                   onChange={this.handleChange}
+                  min={1}
                 />
               </label>
 
