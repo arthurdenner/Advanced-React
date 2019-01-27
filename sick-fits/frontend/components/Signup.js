@@ -57,9 +57,10 @@ class Signup extends React.Component {
             <fieldset disabled={loading} aria-busy={loading}>
               <h2>Sign Up for an Account</h2>
               <Error error={error} />
-              <label>
+              <label htmlFor="email">
                 Email
                 <input
+                  id="email"
                   name="email"
                   onChange={this.handleChange}
                   placeholder="email"
@@ -68,9 +69,10 @@ class Signup extends React.Component {
                   value={email}
                 />
               </label>
-              <label>
+              <label htmlFor="name">
                 Name
                 <input
+                  id="name"
                   name="name"
                   onChange={this.handleChange}
                   placeholder="name"
@@ -79,9 +81,10 @@ class Signup extends React.Component {
                   value={name}
                 />
               </label>
-              <label>
+              <label htmlFor="password">
                 Password
                 <input
+                  id="password"
                   name="password"
                   onChange={this.handleChange}
                   placeholder="password"
