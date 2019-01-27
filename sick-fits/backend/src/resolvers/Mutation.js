@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { randomBytes } = require('crypto');
 const { promisify } = require('util');
 const { transport, makeANiceEmail } = require('../mail');
+const { hasPermission } = require('../utils');
 
 const setCookie = (ctx, userId) => {
   const token = jwt.sign({ userId }, process.env.APP_SECRET);
@@ -110,7 +111,7 @@ const mutations = {
   },
   async resetPassword(parent, args, ctx, info) {
     if (args.password !== args.confirmPassword) {
-      throw new Error("Yo Passwords don't match!");
+      throw new Error("Your passwords don't match!");
     }
 
     const [user] = await ctx.db.query.users({
@@ -137,6 +138,26 @@ const mutations = {
     setCookie(ctx, updatedUser.id);
 
     return updatedUser;
+  },
+  async updatePermissions(parent, args, ctx, info) {
+    if (!ctx.request.userId) {
+      throw new Error('You must be logged in to do that!');
+    }
+
+    const currentUser = await ctx.db.query.user(
+      { where: { id: ctx.request.userId } },
+      info
+    );
+
+    hasPermission(currentUser, ['ADMIN', 'PERMISSIONUPDATE']);
+
+    return ctx.db.mutation.updateUser(
+      {
+        data: { permissions: { set: args.permissions } },
+        where: { id: args.userId },
+      },
+      info
+    );
   },
 };
 
