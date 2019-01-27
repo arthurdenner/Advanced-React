@@ -1,10 +1,11 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { randomBytes } = require('crypto');
+const { promisify } = require('util');
 
 const setCookie = (ctx, userId) => {
-  // 1. generate the JWT Token
   const token = jwt.sign({ userId }, process.env.APP_SECRET);
-  // 2. Set the cookie with the token
+
   ctx.response.cookie('token', token, {
     httpOnly: true,
     maxAge: 1000 * 60 * 60 * 24 * 365,
@@ -45,7 +46,6 @@ const mutations = {
 
     return user;
   },
-
   async signin(parent, { email, password }, ctx, info) {
     const user = await ctx.db.query.user({ where: { email } });
 
@@ -68,6 +68,55 @@ const mutations = {
     ctx.response.clearCookie('token');
 
     return { message: 'Goodbye!' };
+  },
+  async requestResetToken(parent, { email }, ctx, info) {
+    const user = await ctx.db.query.user({ where: { email: email } });
+
+    if (!user) {
+      throw new Error(`No such user found for email ${email}`);
+    }
+
+    const randomBytesPromiseified = promisify(randomBytes);
+    const resetToken = (await randomBytesPromiseified(20)).toString('hex');
+    const resetTokenExpiry = Date.now() + 3600000; // 1 hour from now
+    const res = await ctx.db.mutation.updateUser({
+      where: { email },
+      data: { resetToken, resetTokenExpiry },
+    });
+
+    // TODO: Email them that reset token
+
+    return { message: 'Thanks!' };
+  },
+  async resetPassword(parent, args, ctx, info) {
+    if (args.password !== args.confirmPassword) {
+      throw new Error("Yo Passwords don't match!");
+    }
+
+    const [user] = await ctx.db.query.users({
+      where: {
+        resetToken: args.resetToken,
+        resetTokenExpiry_gte: Date.now() - 3600000,
+      },
+    });
+
+    if (!user) {
+      throw new Error('This token is either invalid or expired!');
+    }
+
+    const password = await bcrypt.hash(args.password, 10);
+    const updatedUser = await ctx.db.mutation.updateUser({
+      where: { email: user.email },
+      data: {
+        password,
+        resetToken: null,
+        resetTokenExpiry: null,
+      },
+    });
+
+    setCookie(ctx, updatedUser.id);
+
+    return updatedUser;
   },
 };
 
