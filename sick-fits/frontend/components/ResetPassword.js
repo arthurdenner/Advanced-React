@@ -30,14 +30,10 @@ class ResetPassword extends React.Component {
     resetToken: PropTypes.string.isRequired,
   };
 
-  state = this.initialState;
-
-  get initialState() {
-    return {
-      password: '',
-      confirmPassword: '',
-    };
-  }
+  state = {
+    password: '',
+    confirmPassword: '',
+  };
 
   handleChange = e => {
     const { name, value } = e.target;

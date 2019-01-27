@@ -1,5 +1,6 @@
 import React from 'react';
 import { Mutation } from 'react-apollo';
+import Router from 'next/router';
 import gql from 'graphql-tag';
 import Error from './ErrorMessage';
 import { CURRENT_USER_QUERY } from './User';
@@ -16,14 +17,10 @@ const SIGNIN_MUTATION = gql`
 `;
 
 class Signin extends React.Component {
-  state = this.initialState;
-
-  get initialState() {
-    return {
-      email: '',
-      password: '',
-    };
-  }
+  state = {
+    email: '',
+    password: '',
+  };
 
   handleChange = e => {
     const { name, value } = e.target;
@@ -46,7 +43,7 @@ class Signin extends React.Component {
             onSubmit={async e => {
               e.preventDefault();
               await signup();
-              this.setState(this.initialState);
+              Router.push('/');
             }}
           >
             <fieldset disabled={loading} aria-busy={loading}>
