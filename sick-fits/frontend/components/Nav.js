@@ -1,36 +1,37 @@
 import Link from 'next/link';
-import Router from 'next/router';
-import NProgress from 'nprogress';
 import NavStyles from './styles/NavStyles';
-
-Router.onRouteChangeStart = () => {
-  NProgress.start();
-};
-Router.onRouteChangeComplete = () => {
-  NProgress.done();
-};
-Router.onRouteChangeError = () => {
-  NProgress.done();
-};
+import User from './User';
+import Signout from './Signout';
 
 const Nav = () => (
-  <NavStyles>
-    <Link href="/items">
-      <a>Items</a>
-    </Link>
-    <Link href="/sell">
-      <a>Sell</a>
-    </Link>
-    <Link href="/signup">
-      <a>Signup</a>
-    </Link>
-    <Link href="/orders">
-      <a>Orders</a>
-    </Link>
-    <Link href="/me">
-      <a>account</a>
-    </Link>
-  </NavStyles>
+  <User>
+    {({ data, data: { me } }) => console.log(data) || (
+      <NavStyles>
+        <Link href="/items">
+          <a>Shop</a>
+        </Link>
+        {me && (
+          <>
+            <Link href="/sell">
+              <a>Sell</a>
+            </Link>
+            <Link href="/orders">
+              <a>Orders</a>
+            </Link>
+            <Link href="/me">
+              <a>Account</a>
+            </Link>
+            <Signout />
+          </>
+        )}
+        {!me && (
+          <Link href="/signup">
+            <a>Sign In</a>
+          </Link>
+        )}
+      </NavStyles>
+    )}
+  </User>
 );
 
 export default Nav;

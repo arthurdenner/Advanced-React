@@ -5,13 +5,9 @@ import Error from './ErrorMessage';
 import { CURRENT_USER_QUERY } from './User';
 import Form from './styles/Form';
 
-const SIGNUP_MUTATION = gql`
-  mutation SIGNUP_MUTATION(
-    $email: String!
-    $name: String!
-    $password: String!
-  ) {
-    signup(email: $email, name: $name, password: $password) {
+const SIGNIN_MUTATION = gql`
+  mutation SIGNIN_MUTATION($email: String!, $password: String!) {
+    signin(email: $email, password: $password) {
       id
       email
       name
@@ -19,13 +15,12 @@ const SIGNUP_MUTATION = gql`
   }
 `;
 
-class Signup extends React.Component {
+class Signin extends React.Component {
   state = this.initialState;
 
   get initialState() {
     return {
       email: '',
-      name: '',
       password: '',
     };
   }
@@ -37,11 +32,11 @@ class Signup extends React.Component {
   };
 
   render() {
-    const { email, name, password } = this.state;
+    const { email, password } = this.state;
 
     return (
       <Mutation
-        mutation={SIGNUP_MUTATION}
+        mutation={SIGNIN_MUTATION}
         variables={this.state}
         refetchQueries={[{ query: CURRENT_USER_QUERY }]}
       >
@@ -55,43 +50,30 @@ class Signup extends React.Component {
             }}
           >
             <fieldset disabled={loading} aria-busy={loading}>
-              <h2>Sign Up for an Account</h2>
+              <h2>Sign into your account</h2>
               <Error error={error} />
-              <label>
+              <label htmlFor="email">
                 Email
                 <input
                   name="email"
                   onChange={this.handleChange}
                   placeholder="email"
-                  required
                   type="email"
                   value={email}
                 />
               </label>
-              <label>
-                Name
-                <input
-                  name="name"
-                  onChange={this.handleChange}
-                  placeholder="name"
-                  required
-                  type="text"
-                  value={name}
-                />
-              </label>
-              <label>
+              <label htmlFor="password">
                 Password
                 <input
                   name="password"
                   onChange={this.handleChange}
                   placeholder="password"
-                  required
                   type="password"
                   value={password}
                 />
               </label>
 
-              <button type="submit">Sign Up!</button>
+              <button type="submit">Sign In!</button>
             </fieldset>
           </Form>
         )}
@@ -100,4 +82,4 @@ class Signup extends React.Component {
   }
 }
 
-export default Signup;
+export default Signin;
