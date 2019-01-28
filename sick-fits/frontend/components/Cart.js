@@ -29,6 +29,8 @@ const Cart = () => (
         return null;
       }
 
+      const validItemsCount = me.cart.filter(cartItem => cartItem.item).length;
+
       return (
         <Mutation mutation={TOGGLE_CART_MUTATION}>
           {toggleCart => (
@@ -41,8 +43,8 @@ const Cart = () => (
                     </CloseButton>
                     <Supreme>{me.name}'s Cart</Supreme>
                     <p>
-                      You Have {me.cart.length} Item
-                      {me.cart.length === 1 ? '' : 's'} in your cart.
+                      You have {validItemsCount} item
+                      {validItemsCount === 1 ? '' : 's'} in your cart.
                     </p>
                   </header>
                   <ul>
