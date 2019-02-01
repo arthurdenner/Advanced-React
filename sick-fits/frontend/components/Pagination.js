@@ -24,7 +24,7 @@ const Pagination = ({ page }) => (
       }
 
       const count = data.itemsConnection.aggregate.count;
-      const pages = Math.ceil(count / perPage);
+      const pages = Math.ceil(count / perPage) || 1;
 
       return (
         <PaginationStyles>
@@ -45,7 +45,7 @@ const Pagination = ({ page }) => (
             </a>
           </Link>
           <p>
-            Page {page} of {pages}!
+            Page {page} of {pages}
           </p>
           <p>{count} Items Total</p>
           <Link
