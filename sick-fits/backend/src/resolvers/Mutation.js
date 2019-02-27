@@ -4,6 +4,7 @@ const { randomBytes } = require('crypto');
 const { promisify } = require('util');
 const { transport, makeANiceEmail } = require('../mail');
 const { hasPermission } = require('../utils');
+const stripe = require('../stripe');
 
 const checkLogin = ctx => {
   if (!ctx.request.userId) {
@@ -221,6 +222,69 @@ const mutations = {
     }
 
     return ctx.db.mutation.deleteCartItem({ where: { id: args.id } }, info);
+  },
+  async createOrder(parent, args, ctx, info) {
+    checkLogin(ctx);
+
+    const currentUser = await ctx.db.query.user(
+      { where: { id: ctx.request.userId } },
+      `{
+        id
+        name
+        email
+        cart {
+          id
+          quantity
+          item {
+            title
+            price
+            id
+            description
+            image
+            largeImage
+          }
+        }
+      }`
+    );
+    const amount = currentUser.cart.reduce(
+      (tally, cartItem) => tally + cartItem.item.price * cartItem.quantity,
+      0
+    );
+    const charge = await stripe.charges.create({
+      amount,
+      currency: 'USD',
+      source: args.token,
+    });
+
+    // Convert CartItems to OrderItems
+    const orderItems = currentUser.cart.map(cartItem => {
+      const { id, ...item } = cartItem.item;
+
+      return {
+        ...item,
+        quantity: cartItem.quantity,
+        user: { connect: { id: currentUser.id } },
+      };
+    });
+
+    // Create an order
+    const order = await ctx.db.mutation.createOrder({
+      data: {
+        total: charge.amount,
+        charge: charge.id,
+        items: { create: orderItems },
+        user: { connect: { id: currentUser.id } },
+      },
+    });
+
+    // Remove user's cartItems
+    await ctx.db.mutation.deleteManyCartItems({
+      where: {
+        id_in: currentUser.cart.map(cartItem => cartItem.id),
+      },
+    });
+
+    return order;
   },
 };
 
