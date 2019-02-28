@@ -47,11 +47,16 @@ class TakeMyMoney extends React.Component {
                   email={me.email}
                   token={async res => {
                     try {
+                      NProgress.start();
+
                       const order = await createOrder({
                         variables: { token: res.id },
                       });
 
-                      console.log(order);
+                      Router.push({
+                        pathname: '/order',
+                        query: { id: order.data.createOrder.id },
+                      });
                     } catch (err) {
                       alert(err.message);
                     }
